@@ -486,14 +486,18 @@ class {$newClassName} {$extends}
         if (method_exists($method, 'hasReturnType') && $method->hasReturnType())
         {
             $returnType = $method->getReturnType();
-            $returnTypeName = $returnType->getName();
+            if (\class_exists(ReflectionUnionType::class, false) && $returnType instanceof ReflectionUnionType) {
+                $returnTypeName = \implode('|', $returnType->getTypes());
+            } else {
+                $returnTypeName = $returnType->getName();
+            }
 
             if ($returnTypeName == 'self')
             {
                 $returnTypeName = $mockedClassName;
             }
 
-            if ($returnType->allowsNull())
+            if ($returnType->allowsNull() && $returnTypeName !== 'mixed')
             {
                 $returnHint = ' : ?' . $returnTypeName;
             } else {
